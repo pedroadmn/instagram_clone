@@ -6,7 +6,7 @@
     <color name="darkRed">#A50a15</color>
     <color name="enterButton">#1FBAD6</color>
     <color name="registerButton">#C9C9CD</color>
-    <color name="middle_grey">#DBDBDB</color>
+    <color name="middleGray">#FFF6F5F5</color>
     <color name="purple">#462759</color>
     <color name="darkBlue">#FF3F51B5</color>
 </resources>

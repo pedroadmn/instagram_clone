@@ -41,12 +41,9 @@ public class FirebaseUserHelper {
             UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder()
                     .setDisplayName(name)
                     .build();
-            user.updateProfile(profile).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (!task.isSuccessful()) {
-                        Log.d("Profile", "Error on update user name: ");
-                    }
+            user.updateProfile(profile).addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    Log.d("Profile", "Error on update user name: ");
                 }
             });
             return true;

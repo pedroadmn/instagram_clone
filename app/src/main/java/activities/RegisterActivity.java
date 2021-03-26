@@ -72,8 +72,9 @@ public class RegisterActivity extends AppCompatActivity {
                             try {
                                 String userId = task.getResult().getUser().getUid();
                                 user.setUserId(userId);
-
                                 user.save();
+
+                                FirebaseUserHelper.updateUsername(user.getName());
 
                                 FirebaseUserHelper.updateUsername(user.getName());
 
