@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,7 +70,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             try {
                                 String userId = task.getResult().getUser().getUid();
-                                user.setUserId(userId);
+                                user.setId(userId);
                                 user.save();
 
                                 FirebaseUserHelper.updateUsername(user.getName());

@@ -4,12 +4,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import helpers.FirebaseConfig;
 
 public class User implements Serializable {
 
-    private String userId;
+    private String id;
     private String name;
     private String email;
     private String password;
@@ -35,12 +37,12 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getId() {
+        return id;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -61,7 +63,24 @@ public class User implements Serializable {
 
     public void save() {
         DatabaseReference firebaseRef = FirebaseConfig.getFirebase();
-        DatabaseReference usersRef = firebaseRef.child("users").child(getUserId());
+        DatabaseReference usersRef = firebaseRef.child("users").child(getId());
         usersRef.setValue(this);
+    }
+
+    public void update() {
+        DatabaseReference firebaseRef = FirebaseConfig.getFirebase();
+        DatabaseReference usersRef = firebaseRef.child("users").child(getId());
+
+        usersRef.updateChildren(convertToMap());
+    }
+
+    private Map<String, Object> convertToMap() {
+        HashMap<String, Object> userMap = new HashMap<>();
+        userMap.put("email", getEmail());
+        userMap.put("name", getName());
+        userMap.put("id", getId());
+        userMap.put("photoPath", getPhotoPath());
+
+        return userMap;
     }
 }
