@@ -1,5 +1,6 @@
 package helpers;
 
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -52,6 +53,25 @@ public class FirebaseUserHelper {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean updateUserPhoto(Uri url) {
+        try {
+            FirebaseUser user = getCurrentUser();
+            UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder()
+                    .setPhotoUri(url)
+                    .build();
+
+            user.updateProfile(profile).addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    Log.d("Profile", "Error on update profile image");
+                }
+            });
+            return true;
+        } catch (Exception exception) {
+            exception.printStackTrace();
             return false;
         }
     }
