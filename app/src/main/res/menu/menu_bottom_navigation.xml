@@ -11,7 +11,7 @@
 
     <item android:id="@+id/icPost"
         android:title="Post"
-        android:icon="@drawable/ic_baseline_add_black_24"/>
+        android:icon="@drawable/ic_baseline_add_box_24"/>
 
     <item android:id="@+id/icProfile"
         android:title="Profile"
