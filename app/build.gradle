@@ -45,4 +45,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.7.0'
     implementation 'com.google.firebase:firebase-storage:19.2.1'
     implementation 'com.firebaseui:firebase-ui-storage:7.1.1'
+
+    implementation 'com.github.ittianyu:BottomNavigationViewEx:2.0.4'
+
 }
