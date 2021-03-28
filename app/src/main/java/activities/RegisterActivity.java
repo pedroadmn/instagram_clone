@@ -63,6 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
                     user.setName(name);
                     user.setEmail(email);
                     user.setPassword(password);
+                    user.setSearchName(name.toLowerCase());
 
                     auth.createUserWithEmailAndPassword(
                             user.getEmail(), user.getPassword()

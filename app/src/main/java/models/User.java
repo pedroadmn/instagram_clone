@@ -13,6 +13,7 @@ public class User implements Serializable {
 
     private String id;
     private String name;
+    private String searchName;
     private String email;
     private String password;
     private String photoPath;
@@ -59,6 +60,14 @@ public class User implements Serializable {
 
     public void setPhotoPath(String photoPath) {
         this.photoPath = photoPath;
+    }
+
+    public String getSearchName() {
+        return searchName;
+    }
+
+    public void setSearchName(String searchName) {
+        this.searchName = searchName;
     }
 
     public void save() {

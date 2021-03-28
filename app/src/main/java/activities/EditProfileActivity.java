@@ -96,6 +96,7 @@ public class EditProfileActivity extends AppCompatActivity {
         FirebaseUserHelper.updateUsername(updatedName);
 
         loggedUser.setName(updatedName);
+        loggedUser.setSearchName(updatedName.toLowerCase());
         loggedUser.update();
 
         Toast.makeText(this, "Successfully updated changes!", Toast.LENGTH_SHORT).show();
