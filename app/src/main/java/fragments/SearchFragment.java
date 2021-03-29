@@ -1,5 +1,6 @@
 package fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,8 +23,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import activities.ProfileActivity;
 import adapters.SearchAdapter;
 import helpers.FirebaseConfig;
+import listeners.RecyclerItemClickListener;
 import models.User;
 import pedroadmn.instagramclone.com.R;
 
@@ -101,5 +105,29 @@ public class SearchFragment extends Fragment {
 
         searchAdapter = new SearchAdapter(users , getActivity());
         rvUsers.setAdapter(searchAdapter);
+
+        rvUsers.addOnItemTouchListener(new RecyclerItemClickListener(
+                getActivity(),
+                rvUsers,
+                new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        User user = users.get(position);
+                        Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                        intent.putExtra("selectedUser", user);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+
+                    }
+
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                    }
+                }
+        ));
     }
 }
