@@ -17,8 +17,14 @@ public class User implements Serializable {
     private String email;
     private String password;
     private String photoPath;
+    private int followers = 0;
+    private int following = 0;
+    private int posts = 0;
 
     public User() {
+        setFollowers(0);
+        setFollowing(0);
+        setPosts(0);
     }
 
     public String getEmail() {
@@ -70,6 +76,30 @@ public class User implements Serializable {
         this.searchName = searchName;
     }
 
+    public int getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(int followers) {
+        this.followers = followers;
+    }
+
+    public int getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(int following) {
+        this.following = following;
+    }
+
+    public int getPosts() {
+        return posts;
+    }
+
+    public void setPosts(int posts) {
+        this.posts = posts;
+    }
+
     public void save() {
         DatabaseReference firebaseRef = FirebaseConfig.getFirebase();
         DatabaseReference usersRef = firebaseRef.child("users").child(getId());
@@ -89,6 +119,9 @@ public class User implements Serializable {
         userMap.put("name", getName());
         userMap.put("id", getId());
         userMap.put("photoPath", getPhotoPath());
+        userMap.put("followers", getFollowers());
+        userMap.put("following", getFollowing());
+        userMap.put("posts", getPosts());
 
         return userMap;
     }
