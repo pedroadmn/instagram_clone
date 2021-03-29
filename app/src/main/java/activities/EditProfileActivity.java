@@ -168,6 +168,13 @@ public class EditProfileActivity extends AppCompatActivity {
             loggedUser.setPhotoPath(url.toString());
             loggedUser.update();
 
+            String photoPath =  loggedUser.getPhotoPath();
+
+            if (photoPath != null) {
+                Uri uri = Uri.parse(photoPath);
+                Glide.with(EditProfileActivity.this).load(uri).into(cvEditProfilePhoto);
+            }
+
             Toast.makeText(EditProfileActivity.this, "The photo was updated", Toast.LENGTH_SHORT).show();
         }
     }
