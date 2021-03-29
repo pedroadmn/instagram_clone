@@ -26,6 +26,7 @@ import java.util.List;
 import activities.ProfileActivity;
 import adapters.SearchAdapter;
 import helpers.FirebaseConfig;
+import helpers.FirebaseUserHelper;
 import listeners.RecyclerItemClickListener;
 import models.User;
 import pedroadmn.instagramclone.com.R;
@@ -37,6 +38,8 @@ public class SearchFragment extends Fragment {
     private List<User> users;
     private DatabaseReference userRef;
     private SearchAdapter searchAdapter;
+
+    private User loggedUser;
 
     public SearchFragment() {
 
@@ -79,7 +82,10 @@ public class SearchFragment extends Fragment {
                     users.clear();
 
                     for (DataSnapshot ds : snapshot.getChildren()) {
-                        users.add(ds.getValue(User.class));
+                        User user = ds.getValue(User.class);
+                        if (!user.getId().equals(loggedUser.getId())) {
+                            users.add(ds.getValue(User.class));
+                        }
                     }
 
                     searchAdapter.notifyDataSetChanged();
@@ -94,6 +100,8 @@ public class SearchFragment extends Fragment {
     }
 
     private void initializeComponents(View view) {
+        loggedUser = FirebaseUserHelper.getLoggedUserInfo();
+
         svUsers = view.findViewById(R.id.svUsers);
 
         rvUsers = view.findViewById(R.id.rvUsers);

@@ -144,6 +144,19 @@ public class ProfileActivity extends AppCompatActivity {
 
         btFollow.setText("Following");
         btFollow.setOnClickListener(null);
+
+        int following = loggedUser.getFollowing() + 1;
+        HashMap<String, Object> followingData = new HashMap<>();
+        followingData.put("following", following);
+        DatabaseReference userFollowing = usersRef.child(loggedUser.getId());
+        userFollowing.updateChildren(followingData);
+
+        int followers = userToFollow.getFollowers() + 1;
+        HashMap<String, Object> followersData = new HashMap<>();
+        followersData.put("followers", followers);
+        DatabaseReference userFollowers = usersRef.child(userToFollow.getId());
+        userFollowers.updateChildren(followersData);
+
     }
 
     private void getLoggedUserData() {
