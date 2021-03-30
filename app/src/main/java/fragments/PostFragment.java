@@ -25,6 +25,7 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
+import activities.FilterActivity;
 import helpers.Permission;
 import pedroadmn.instagramclone.com.R;
 
@@ -107,50 +108,36 @@ public class PostFragment extends Fragment {
 //        dialog.show();
 //    }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (resultCode == getActivity().RESULT_OK) {
-//            Bitmap bitmap = null;
-//            try {
-//                switch (requestCode) {
-//                    case CAMERA_SELECTION:
-//                        bitmap = (Bitmap) data.getExtras().get("data");
-//                        break;
-//                    case GALLERY_SELECTION:
-//                        Uri selectedImageLocal = data.getData();
-//                        bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImageLocal);
-//                        break;
-//                }
-//
-//                if (bitmap != null) {
-//                    civProfileImage.setImageBitmap(bitmap);
-//
-//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-//                    byte[] imageData = baos.toByteArray();
-//
-//                    final StorageReference imageRef = storageReference
-//                            .child("images")
-//                            .child("perfil")
-//                            .child(userId + ".jpeg");
-//
-//                    UploadTask uploadTask = imageRef.putBytes(imageData);
-//                    uploadTask.addOnFailureListener(e -> {
-//                        Toast.makeText(getActivity(), "Error on upload image", Toast.LENGTH_SHORT).show();
-//                    })
-//                            .addOnSuccessListener(taskSnapshot -> {
-//                                Toast.makeText(getActivity(), "Photo Successfully uploaded", Toast.LENGTH_SHORT).show();
-//                                imageRef.getDownloadUrl().addOnCompleteListener(task -> {
-//                                    Uri url = task.getResult();
-//                                    updateUserPhoto(url);
-//                                });
-//                            });
-//                }
-//            } catch (Exception exception) {
-//                exception.printStackTrace();
-//            }
-//        }
-//    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == getActivity().RESULT_OK) {
+            Bitmap bitmap = null;
+            try {
+                switch (requestCode) {
+                    case CAMERA_SELECTION:
+                        bitmap = (Bitmap) data.getExtras().get("data");
+                        break;
+                    case GALLERY_SELECTION:
+                        Uri selectedImageLocal = data.getData();
+                        bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImageLocal);
+                        break;
+                }
+
+                if (bitmap != null) {
+
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] imageData = baos.toByteArray();
+
+                    Intent intent = new Intent(getActivity(), FilterActivity.class);
+                    intent.putExtra("selectedImage", imageData);
+                    startActivity(intent);
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
 }
