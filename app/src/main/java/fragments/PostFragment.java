@@ -1,66 +1,156 @@
 package fragments;
 
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
+
+import helpers.Permission;
 import pedroadmn.instagramclone.com.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link PostFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class PostFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private Button btOpenGallery;
+    private Button btOpenCamera;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final int GALLERY_SELECTION = 100;
+    private static final int CAMERA_SELECTION = 200;
+
+    private String[] permissions = new String[] {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+    };
 
     public PostFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment PostFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static PostFragment newInstance(String param1, String param2) {
-        PostFragment fragment = new PostFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_post, container, false);
+        View view = inflater.inflate(R.layout.fragment_post, container, false);
+
+        initializeComponents(view);
+
+        Permission.validatePermissions(permissions, getActivity(), 1);
+
+        return view;
     }
+
+    private void initializeComponents(View view) {
+        btOpenGallery = view.findViewById(R.id.btOpenGallery);
+        btOpenCamera = view.findViewById(R.id.btOpenCamera);
+
+        btOpenGallery.setOnClickListener(v -> openGallery());
+        btOpenCamera.setOnClickListener(v -> openCamera());
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivityForResult(intent, GALLERY_SELECTION);
+        }
+    }
+
+    private void openCamera() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivityForResult(intent, CAMERA_SELECTION);
+        }
+    }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        for(int permissionResult : grantResults) {
+//            if (permissionResult == PackageManager.PERMISSION_DENIED) {
+//                warningPermissionValidation();
+//            }
+//        }
+//    }
+//
+//    private void warningPermissionValidation() {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+//        builder.setTitle("Denied Permissions");
+//        builder.setMessage("To use the app is necessary accept the permissions");
+//        builder.setCancelable(false);
+//        builder.setPositiveButton("Confirm", (dialogInterface, i) -> getActivity().finish());
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//    }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (resultCode == getActivity().RESULT_OK) {
+//            Bitmap bitmap = null;
+//            try {
+//                switch (requestCode) {
+//                    case CAMERA_SELECTION:
+//                        bitmap = (Bitmap) data.getExtras().get("data");
+//                        break;
+//                    case GALLERY_SELECTION:
+//                        Uri selectedImageLocal = data.getData();
+//                        bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImageLocal);
+//                        break;
+//                }
+//
+//                if (bitmap != null) {
+//                    civProfileImage.setImageBitmap(bitmap);
+//
+//                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+//                    byte[] imageData = baos.toByteArray();
+//
+//                    final StorageReference imageRef = storageReference
+//                            .child("images")
+//                            .child("perfil")
+//                            .child(userId + ".jpeg");
+//
+//                    UploadTask uploadTask = imageRef.putBytes(imageData);
+//                    uploadTask.addOnFailureListener(e -> {
+//                        Toast.makeText(getActivity(), "Error on upload image", Toast.LENGTH_SHORT).show();
+//                    })
+//                            .addOnSuccessListener(taskSnapshot -> {
+//                                Toast.makeText(getActivity(), "Photo Successfully uploaded", Toast.LENGTH_SHORT).show();
+//                                imageRef.getDownloadUrl().addOnCompleteListener(task -> {
+//                                    Uri url = task.getResult();
+//                                    updateUserPhoto(url);
+//                                });
+//                            });
+//                }
+//            } catch (Exception exception) {
+//                exception.printStackTrace();
+//            }
+//        }
+//    }
 }

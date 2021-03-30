@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 import de.hdodenhof.circleimageview.CircleImageView;
 import helpers.FirebaseConfig;
 import helpers.FirebaseUserHelper;
+import helpers.Permission;
 import models.User;
 import pedroadmn.instagramclone.com.R;
 
@@ -46,10 +48,17 @@ public class EditProfileActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private StorageReference storageReference;
 
+    private String[] permissions = new String[] {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.CAMERA
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
+
+        Permission.validatePermissions(permissions, this, 1);
 
         Toolbar toolbar = findViewById(R.id.idToolbar);
         toolbar.setTitle("Edit Profile");
