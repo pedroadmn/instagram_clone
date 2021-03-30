@@ -128,7 +128,7 @@ public class PostFragment extends Fragment {
                 if (bitmap != null) {
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
                     byte[] imageData = baos.toByteArray();
 
                     Intent intent = new Intent(getActivity(), FilterActivity.class);
