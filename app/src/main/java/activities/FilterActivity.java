@@ -20,6 +20,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.zomato.photofilters.FilterPack;
@@ -36,6 +40,7 @@ import helpers.FirebaseConfig;
 import helpers.FirebaseUserHelper;
 import listeners.RecyclerItemClickListener;
 import models.Post;
+import models.User;
 import pedroadmn.instagramclone.com.R;
 
 public class FilterActivity extends AppCompatActivity {
@@ -51,8 +56,15 @@ public class FilterActivity extends AppCompatActivity {
     private RecyclerView rvFilters;
     private List<ThumbnailItem> filterList;
     private FilterThumbnailsAdapter filterThumbnailsAdapter;
+    private ProgressBar pbFilter;
 
     private String loggedUserId;
+    private DatabaseReference loggedUserRef;
+    private DatabaseReference usersRef;
+    private DatabaseReference firebaseRef;
+    private User loggedUser;
+
+    private boolean isLoading;
 
     private StorageReference storageReference;
 
@@ -69,6 +81,8 @@ public class FilterActivity extends AppCompatActivity {
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
 
         initializeComponents();
+
+        getLoggedUserData();
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -112,14 +126,45 @@ public class FilterActivity extends AppCompatActivity {
         }
     }
 
+    private void setLoadingVisibility(boolean visibility) {
+        if (visibility) {
+            isLoading = true;
+            pbFilter.setVisibility(View.VISIBLE);
+        } else {
+            isLoading = false;
+            pbFilter.setVisibility(View.GONE);
+        }
+    }
+
+    private void getLoggedUserData() {
+        setLoadingVisibility(true);
+        loggedUserRef = usersRef.child(loggedUserId);
+        loggedUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                loggedUser = snapshot.getValue(User.class);
+                setLoadingVisibility(false);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                setLoadingVisibility(false);
+            }
+        });
+    }
+
     private void initializeComponents() {
         ivSelectedImage = findViewById(R.id.ivSelectedImage);
         filterList = new ArrayList<>();
         etDescription = findViewById(R.id.etFilterDescription);
         rvFilters = findViewById(R.id.rvFilters);
+        pbFilter = findViewById(R.id.pbFilter);
 
         loggedUserId = FirebaseUserHelper.getLoggedUserId();
         storageReference = FirebaseConfig.getFirebaseStorage();
+
+        firebaseRef = FirebaseConfig.getFirebase();
+        usersRef = firebaseRef.child("users");
     }
 
     private void getFilters() {
@@ -165,36 +210,43 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void publish() {
-        Post post = new Post();
-        post.setUserId(loggedUserId);
-        post.setDescription(etDescription.getText().toString());
+        if (isLoading) {
+            Toast.makeText(this, "Loading data, wait.", Toast.LENGTH_SHORT).show();
+        } else {
+            Post post = new Post();
+            post.setUserId(loggedUserId);
+            post.setDescription(etDescription.getText().toString());
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        imageFilter.compress(Bitmap.CompressFormat.JPEG, 70, baos);
-        byte[] imageData = baos.toByteArray();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            imageFilter.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+            byte[] imageData = baos.toByteArray();
 
-        final StorageReference postsRef = storageReference
-                .child("images")
-                .child("posts")
-                .child(post.getId() + ".jpeg");
+            final StorageReference postsRef = storageReference
+                    .child("images")
+                    .child("posts")
+                    .child(post.getId() + ".jpeg");
 
-        UploadTask uploadTask = postsRef.putBytes(imageData);
-        uploadTask.addOnFailureListener(e -> {
-            Toast.makeText(FilterActivity.this, "Error on save image", Toast.LENGTH_SHORT).show();
-        })
-                .addOnSuccessListener(taskSnapshot -> {
-                    postsRef.getDownloadUrl().addOnCompleteListener(task -> {
-                        Uri url = task.getResult();
-                        post.setPhotoPath(url.toString());
+            UploadTask uploadTask = postsRef.putBytes(imageData);
+            uploadTask.addOnFailureListener(e -> {
+                Toast.makeText(FilterActivity.this, "Error on save image", Toast.LENGTH_SHORT).show();
+            })
+                    .addOnSuccessListener(taskSnapshot -> {
+                        postsRef.getDownloadUrl().addOnCompleteListener(task -> {
+                            Uri url = task.getResult();
+                            post.setPhotoPath(url.toString());
 
-                        if (post.save()) {
-                            Toast.makeText(FilterActivity.this, "Post Successfully saved", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                    })
-                            .addOnFailureListener(error -> {
-                            });
-                });
+                            if (post.save()) {
+                                int postQtt = loggedUser.getPosts() + 1;
+                                loggedUser.setPosts(postQtt);
+                                loggedUser.updatePostsQtt();
+                                Toast.makeText(FilterActivity.this, "Post Successfully saved", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        })
+                                .addOnFailureListener(error -> {
+                                });
+                    });
+        }
     }
 
     @Override

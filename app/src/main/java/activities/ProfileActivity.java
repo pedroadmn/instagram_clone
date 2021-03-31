@@ -117,7 +117,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                 tvFollowers.setText(String.valueOf(user.getFollowers()));
                 tvFollowing.setText(String.valueOf(user.getFollowing()));
-//                tvPosts.setText(String.valueOf(user.getPosts()));
+                tvPosts.setText(String.valueOf(user.getPosts()));
             }
 
             @Override
@@ -205,8 +205,6 @@ public class ProfileActivity extends AppCompatActivity {
                     Post post = ds.getValue(Post.class);
                     photoUrls.add(post.getPhotoPath());
                 }
-
-                tvPosts.setText(String.valueOf(photoUrls.size()));
 
                 postsGridAdapter = new PostsGridAdapter(getApplicationContext(), R.layout.grid_post_adapter, photoUrls);
                 gvPosts.setAdapter(postsGridAdapter);

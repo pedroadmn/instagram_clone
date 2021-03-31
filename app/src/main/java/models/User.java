@@ -113,6 +113,16 @@ public class User implements Serializable {
         usersRef.updateChildren(convertToMap());
     }
 
+    public void updatePostsQtt() {
+        DatabaseReference firebaseRef = FirebaseConfig.getFirebase();
+        DatabaseReference usersRef = firebaseRef.child("users").child(getId());
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("posts", getPosts());
+
+        usersRef.updateChildren(data);
+    }
+
     private Map<String, Object> convertToMap() {
         HashMap<String, Object> userMap = new HashMap<>();
         userMap.put("email", getEmail());

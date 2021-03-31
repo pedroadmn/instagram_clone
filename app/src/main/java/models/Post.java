@@ -2,6 +2,8 @@ package models;
 
 import com.google.firebase.database.DatabaseReference;
 
+import java.util.HashMap;
+
 import helpers.FirebaseConfig;
 
 public class Post {
