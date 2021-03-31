@@ -2,11 +2,11 @@ package models;
 
 import com.google.firebase.database.DatabaseReference;
 
-import java.util.HashMap;
+import java.io.Serializable;
 
 import helpers.FirebaseConfig;
 
-public class Post {
+public class Post implements Serializable {
     private String id;
     private String userId;
     private String description;

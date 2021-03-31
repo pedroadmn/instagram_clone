@@ -1,7 +1,10 @@
 package activities;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -54,6 +57,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private String userLoggedId;
 
+    private List<Post> posts;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +93,14 @@ public class ProfileActivity extends AppCompatActivity {
 
             initImageLoader();
             loadPosts();
+
+            gvPosts.setOnItemClickListener((adapterView, view, i, l) -> {
+                Post post = posts.get(i);
+                Intent intent = new Intent(ProfileActivity.this, PostActivity.class);
+                intent.putExtra("selectedPost", post);
+                intent.putExtra("selectedUser", selectedUser);
+                startActivity(intent);
+            });
         }
     }
 
@@ -191,6 +204,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadPosts() {
+        posts = new ArrayList<>();
         postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -203,6 +217,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                 for (DataSnapshot ds : snapshot.getChildren()) {
                     Post post = ds.getValue(Post.class);
+                    posts.add(post);
                     photoUrls.add(post.getPhotoPath());
                 }
 
