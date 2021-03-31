@@ -51,4 +51,6 @@ dependencies {
 
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
+    implementation 'info.androidhive:imagefilters:1.0.7'
+
 }

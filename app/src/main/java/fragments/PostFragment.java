@@ -1,27 +1,18 @@
 package fragments;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
-
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import java.io.ByteArrayOutputStream;
 
@@ -85,28 +76,6 @@ public class PostFragment extends Fragment {
             startActivityForResult(intent, CAMERA_SELECTION);
         }
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//
-//        for(int permissionResult : grantResults) {
-//            if (permissionResult == PackageManager.PERMISSION_DENIED) {
-//                warningPermissionValidation();
-//            }
-//        }
-//    }
-//
-//    private void warningPermissionValidation() {
-//        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-//        builder.setTitle("Denied Permissions");
-//        builder.setMessage("To use the app is necessary accept the permissions");
-//        builder.setCancelable(false);
-//        builder.setPositiveButton("Confirm", (dialogInterface, i) -> getActivity().finish());
-//
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
-//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
