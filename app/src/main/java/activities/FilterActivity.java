@@ -2,6 +2,7 @@ package activities;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,16 +19,23 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.zomato.photofilters.FilterPack;
 import com.zomato.photofilters.imageprocessors.Filter;
 import com.zomato.photofilters.utils.ThumbnailItem;
 import com.zomato.photofilters.utils.ThumbnailsManager;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import adapters.FilterThumbnailsAdapter;
+import helpers.FirebaseConfig;
+import helpers.FirebaseUserHelper;
 import listeners.RecyclerItemClickListener;
+import models.Post;
 import pedroadmn.instagramclone.com.R;
 
 public class FilterActivity extends AppCompatActivity {
@@ -34,12 +44,17 @@ public class FilterActivity extends AppCompatActivity {
         System.loadLibrary("NativeImageProcessor");
     }
 
+    private TextInputEditText etDescription;
     private ImageView ivSelectedImage;
     private Bitmap image;
     private Bitmap imageFilter;
     private RecyclerView rvFilters;
     private List<ThumbnailItem> filterList;
     private FilterThumbnailsAdapter filterThumbnailsAdapter;
+
+    private String loggedUserId;
+
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +75,8 @@ public class FilterActivity extends AppCompatActivity {
             byte[] imageData = bundle.getByteArray("selectedImage");
             image = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
             ivSelectedImage.setImageBitmap(image);
+
+            imageFilter = image.copy(image.getConfig(), true);
 
             filterThumbnailsAdapter = new FilterThumbnailsAdapter(filterList, this);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -98,7 +115,11 @@ public class FilterActivity extends AppCompatActivity {
     private void initializeComponents() {
         ivSelectedImage = findViewById(R.id.ivSelectedImage);
         filterList = new ArrayList<>();
+        etDescription = findViewById(R.id.etFilterDescription);
         rvFilters = findViewById(R.id.rvFilters);
+
+        loggedUserId = FirebaseUserHelper.getLoggedUserId();
+        storageReference = FirebaseConfig.getFirebaseStorage();
     }
 
     private void getFilters() {
@@ -144,7 +165,36 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void publish() {
+        Post post = new Post();
+        post.setUserId(loggedUserId);
+        post.setDescription(etDescription.getText().toString());
 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        imageFilter.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+        byte[] imageData = baos.toByteArray();
+
+        final StorageReference postsRef = storageReference
+                .child("images")
+                .child("posts")
+                .child(post.getId() + ".jpeg");
+
+        UploadTask uploadTask = postsRef.putBytes(imageData);
+        uploadTask.addOnFailureListener(e -> {
+            Toast.makeText(FilterActivity.this, "Error on save image", Toast.LENGTH_SHORT).show();
+        })
+                .addOnSuccessListener(taskSnapshot -> {
+                    postsRef.getDownloadUrl().addOnCompleteListener(task -> {
+                        Uri url = task.getResult();
+                        post.setPhotoPath(url.toString());
+
+                        if (post.save()) {
+                            Toast.makeText(FilterActivity.this, "Post Successfully saved", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    })
+                            .addOnFailureListener(error -> {
+                            });
+                });
     }
 
     @Override
