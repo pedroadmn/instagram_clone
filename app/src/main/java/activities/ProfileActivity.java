@@ -194,7 +194,6 @@ public class ProfileActivity extends AppCompatActivity {
         postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-
                 int gridSize = getResources().getDisplayMetrics().widthPixels;
                 int imageSize = gridSize / 3;
 
