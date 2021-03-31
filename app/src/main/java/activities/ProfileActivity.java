@@ -3,6 +3,7 @@ package activities;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,12 +15,20 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import adapters.PostsGridAdapter;
 import de.hdodenhof.circleimageview.CircleImageView;
 import helpers.FirebaseConfig;
 import helpers.FirebaseUserHelper;
+import models.Post;
 import models.User;
 import pedroadmn.instagramclone.com.R;
 
@@ -30,6 +39,8 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView tvPosts;
     private TextView tvFollowers;
     private TextView tvFollowing;
+    private GridView gvPosts;
+    private PostsGridAdapter postsGridAdapter;
 
     private User selectedUser;
     private User loggedUser;
@@ -38,6 +49,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference loggedUserRef;
     private DatabaseReference followersRef;
     private DatabaseReference friendUserRef;
+    private DatabaseReference postsRef;
     private ValueEventListener valueEventListenerFriendProfile;
 
     private String userLoggedId;
@@ -60,6 +72,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         if (bundle != null) {
             selectedUser =  (User) bundle.getSerializable("selectedUser");
+
+            postsRef = firebaseRef.child("posts").child(selectedUser.getId());
+
             getSupportActionBar().setTitle(selectedUser.getName());
 
             String photoPath = selectedUser.getPhotoPath();
@@ -70,6 +85,9 @@ public class ProfileActivity extends AppCompatActivity {
             } else {
                 cvProfileImage.setImageResource(R.drawable.avatar);
             }
+
+            initImageLoader();
+            loadPosts();
         }
     }
 
@@ -79,6 +97,7 @@ public class ProfileActivity extends AppCompatActivity {
         tvFollowers = findViewById(R.id.tvFollowersNumber);
         tvPosts = findViewById(R.id.tvPostNumber);
         tvFollowing = findViewById(R.id.tvFollowingNumber);
+        gvPosts = findViewById(R.id.gvPosts);
 
         userLoggedId = FirebaseUserHelper.getLoggedUserId();
 
@@ -98,7 +117,7 @@ public class ProfileActivity extends AppCompatActivity {
 
                 tvFollowers.setText(String.valueOf(user.getFollowers()));
                 tvFollowing.setText(String.valueOf(user.getFollowing()));
-                tvPosts.setText(String.valueOf(user.getPosts()));
+//                tvPosts.setText(String.valueOf(user.getPosts()));
             }
 
             @Override
@@ -159,6 +178,49 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
+    private void initImageLoader() {
+        ImageLoaderConfiguration configuration = new ImageLoaderConfiguration.Builder(this)
+                .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
+                .memoryCacheSize(2 * 1024 * 1024)
+                .diskCacheSize(50 * 1024 * 1024)
+                .diskCacheFileCount(100)
+                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator())
+                .build();
+
+        ImageLoader.getInstance().init(configuration);
+    }
+
+    private void loadPosts() {
+        postsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                int gridSize = getResources().getDisplayMetrics().widthPixels;
+                int imageSize = gridSize / 3;
+
+                gvPosts.setColumnWidth(imageSize);
+
+                List<String> photoUrls = new ArrayList<>();
+
+                for (DataSnapshot ds : snapshot.getChildren()) {
+                    Post post = ds.getValue(Post.class);
+                    photoUrls.add(post.getPhotoPath());
+                }
+
+                tvPosts.setText(String.valueOf(photoUrls.size()));
+
+                postsGridAdapter = new PostsGridAdapter(getApplicationContext(), R.layout.grid_post_adapter, photoUrls);
+                gvPosts.setAdapter(postsGridAdapter);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private void getLoggedUserData() {
         loggedUserRef = usersRef.child(userLoggedId);
         loggedUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -174,7 +236,6 @@ public class ProfileActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
     private void enableFollowButton(boolean followUser) {

@@ -148,10 +148,11 @@
         tools:visibility="visible"/>
 
     <GridView
-        android:id="@+id/gvProfile"
+        android:id="@+id/gvPosts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
+        android:layout_margin="10dp"
+        android:numColumns="3"
         app:layout_constraintTop_toBottomOf="@+id/clProfile"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
