@@ -141,7 +141,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void verifyIfFollowTheUser() {
-        DatabaseReference followerRef = followersRef.child(userLoggedId).child(selectedUser.getId());
+        DatabaseReference followerRef = followersRef.child(selectedUser.getId()).child(userLoggedId);
 
         followerRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -165,14 +165,14 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void followUser(User loggedUser, User userToFollow) {
-        HashMap<String, Object> userToFollowData = new HashMap<>();
-        userToFollowData.put("name", userToFollow.getName());
-        userToFollowData.put("photoPath", userToFollow.getPhotoPath());
+        HashMap<String, Object> loggedUserData = new HashMap<>();
+        loggedUserData.put("name", loggedUser.getName());
+        loggedUserData.put("photoPath", loggedUser.getPhotoPath());
 
-        DatabaseReference followerRef = followersRef.child(loggedUser.getId())
-                .child(userToFollow.getId());
+        DatabaseReference followerRef = followersRef.child(userToFollow.getId())
+                .child(loggedUser.getId());
 
-        followerRef.setValue(userToFollowData);
+        followerRef.setValue(loggedUserData);
 
         btFollow.setText("Following");
         btFollow.setOnClickListener(null);
