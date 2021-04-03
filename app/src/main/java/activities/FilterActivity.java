@@ -64,6 +64,7 @@ public class FilterActivity extends AppCompatActivity {
     private User loggedUser;
 
     private StorageReference storageReference;
+    private DataSnapshot followersSnapshot;
 
     private AlertDialog dialog;
 
@@ -81,7 +82,7 @@ public class FilterActivity extends AppCompatActivity {
 
         initializeComponents();
 
-        getLoggedUserData();
+        getPostData();
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -135,18 +136,32 @@ public class FilterActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void getLoggedUserData() {
+    private void getPostData() {
         openLoadingDialog("Loading data, wait.");
         loggedUserRef = usersRef.child(loggedUserId);
         loggedUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 loggedUser = snapshot.getValue(User.class);
-                dialog.cancel();
+
+                DatabaseReference followers = firebaseRef.child("followers").child(loggedUserId);
+                followers.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        followersSnapshot = snapshot;
+                        dialog.cancel();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                dialog.cancel();
             }
         });
     }
@@ -226,10 +241,11 @@ public class FilterActivity extends AppCompatActivity {
                     Uri url = task.getResult();
                     post.setPhotoPath(url.toString());
 
-                    if (post.save()) {
-                        int postQtt = loggedUser.getPosts() + 1;
-                        loggedUser.setPosts(postQtt);
-                        loggedUser.updatePostsQtt();
+                    int postQtt = loggedUser.getPosts() + 1;
+                    loggedUser.setPosts(postQtt);
+                    loggedUser.updatePostsQtt();
+
+                    if (post.save(followersSnapshot)) {
                         Toast.makeText(FilterActivity.this, "Post Successfully saved", Toast.LENGTH_SHORT).show();
                         dialog.cancel();
                         finish();

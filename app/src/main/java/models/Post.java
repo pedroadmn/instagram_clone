@@ -1,10 +1,14 @@
 package models;
 
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import helpers.FirebaseConfig;
+import helpers.FirebaseUserHelper;
 
 public class Post implements Serializable {
     private String id;
@@ -51,10 +55,33 @@ public class Post implements Serializable {
         this.photoPath = photoPath;
     }
 
-    public boolean save() {
+    public boolean save(DataSnapshot followersSnapshot) {
+        Map object = new HashMap();
+
+        User loggedUser = FirebaseUserHelper.getLoggedUserInfo();
+
         DatabaseReference firebaseRef = FirebaseConfig.getFirebase();
-        DatabaseReference usersRef = firebaseRef.child("posts").child(getUserId()).child(getId());
-        usersRef.setValue(this);
+
+        String idCombination = "/" + getUserId() + "/" + getId();
+        object.put("/posts" + idCombination, this);
+
+        for (DataSnapshot follower : followersSnapshot.getChildren()) {
+            String follewerId = follower.getKey();
+
+            HashMap<String, Object> followerData = new HashMap<>();
+            followerData.put("postPhoto", getPhotoPath());
+            followerData.put("description", getDescription());
+            followerData.put("id", getId());
+            followerData.put("userName", loggedUser.getName());
+            followerData.put("userPhoto", loggedUser.getPhotoPath());
+
+            String idUpdate = "/" + follewerId + "/" + getId();
+
+            object.put("/feed" + idUpdate, followerData);
+        }
+
+        firebaseRef.updateChildren(object);
+        
         return true;
     }
 }
