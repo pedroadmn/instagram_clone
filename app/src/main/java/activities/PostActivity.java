@@ -22,7 +22,6 @@ public class PostActivity extends AppCompatActivity {
     private TextView tvPostUserName;
     private TextView tvLikes;
     private TextView tvPostDescription;
-    private TextView tvPostShowComments;
 
     private User selectedUser;
     private Post selectedPost;
@@ -71,7 +70,6 @@ public class PostActivity extends AppCompatActivity {
         tvPostUserName = findViewById(R.id.tvPostUserName);
         tvLikes = findViewById(R.id.tvLikes);
         tvPostDescription = findViewById(R.id.tvPostDescription);
-        tvPostShowComments = findViewById(R.id.tvPostShowComments);
     }
 
     @Override
