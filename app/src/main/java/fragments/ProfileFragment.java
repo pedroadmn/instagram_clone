@@ -71,13 +71,6 @@ public class ProfileFragment extends Fragment {
 
         initializeComponents(view);
 
-        String photoPath = loggedUser.getPhotoPath();
-
-        if (photoPath != null) {
-            Uri url = Uri.parse(photoPath);
-            Glide.with(getActivity()).load(url).into(cvProfileImage);
-        }
-
         initImageLoader();
 
         loadPosts();
@@ -124,8 +117,6 @@ public class ProfileFragment extends Fragment {
                     photoUrls.add(post.getPhotoPath());
                 }
 
-                tvPostNumber.setText(String.valueOf(photoUrls.size()));
-
                 postsGridAdapter = new PostsGridAdapter(getActivity(), R.layout.grid_post_adapter, photoUrls);
                 gvProfilePosts.setAdapter(postsGridAdapter);
 
@@ -155,6 +146,15 @@ public class ProfileFragment extends Fragment {
         super.onStart();
 
         getLoggedUserData();
+
+        loggedUser = FirebaseUserHelper.getLoggedUserInfo();
+
+        String photoPath = loggedUser.getPhotoPath();
+
+        if (photoPath != null) {
+            Uri url = Uri.parse(photoPath);
+            Glide.with(getActivity()).load(url).into(cvProfileImage);
+        }
     }
 
     private void getLoggedUserData() {
@@ -167,7 +167,7 @@ public class ProfileFragment extends Fragment {
 
                 tvFollowersNumber.setText(String.valueOf(user.getFollowers()));
                 tvFollowingNumber.setText(String.valueOf(user.getFollowing()));
-//                tvPosts.setText(String.valueOf(user.getPosts()));
+                tvPostNumber.setText(String.valueOf(user.getPosts()));
             }
 
             @Override
