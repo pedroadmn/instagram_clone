@@ -1,6 +1,7 @@
 package adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.like.OnLikeListener;
 
 import java.util.List;
 
+import activities.CommentsActivity;
 import de.hdodenhof.circleimageview.CircleImageView;
 import helpers.FirebaseConfig;
 import helpers.FirebaseUserHelper;
@@ -56,6 +58,12 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
 
         holder.tvPostDescription.setText(feedItem.getDescription());
         holder.tvPostUserName.setText(feedItem.getUserName());
+
+        holder.ivComments.setOnClickListener(view -> {
+            Intent intent = new Intent(context, CommentsActivity.class);
+            intent.putExtra("postId", feedItem.getId());
+            context.startActivity(intent);
+        });
 
         if (userPhotoUrl != null) {
             Glide.with(context).load(userPhotoUrl).into(holder.civPostUser);

@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="activities.PostActivity"></activity>
+        <activity android:name="activities.CommentsActivity"></activity>
+        <activity android:name="activities.PostActivity" />
         <activity android:name="activities.FilterActivity" />
         <activity android:name="activities.ProfileActivity" />
         <activity
