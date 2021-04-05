@@ -12,12 +12,21 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.like.LikeButton;
+import com.like.OnLikeListener;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import helpers.FirebaseConfig;
+import helpers.FirebaseUserHelper;
 import models.Feed;
+import models.PostLiked;
+import models.User;
 import pedroadmn.instagramclone.com.R;
 
 public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> {
@@ -40,6 +49,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Feed feedItem = feedList.get(position);
+        User loggedUser = FirebaseUserHelper.getLoggedUserInfo();
 
         Uri userPhotoUrl = Uri.parse(feedItem.getUserPhoto());
         Uri postPhotoUrl = Uri.parse(feedItem.getPostPhoto());
@@ -54,6 +64,48 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
         if (postPhotoUrl != null) {
             Glide.with(context).load(postPhotoUrl).into(holder.ivPostPhoto);
         }
+
+        DatabaseReference likesRef = FirebaseConfig.getFirebase().child("post-likes").child(feedItem.getId());
+
+        likesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int likeQtt = 0;
+
+                if (snapshot.hasChild("likeQtt")) {
+                    PostLiked postLiked = snapshot.getValue(PostLiked.class);
+                    likeQtt = postLiked.getLikeQtt();
+                }
+
+                holder.btLikeFeed.setLiked(snapshot.hasChild(loggedUser.getId()));
+
+                PostLiked like = new PostLiked();
+                like.setFeed(feedItem);
+                like.setUser(loggedUser);
+                like.setLikeQtt(likeQtt);
+
+                holder.btLikeFeed.setOnLikeListener(new OnLikeListener() {
+                    @Override
+                    public void liked(LikeButton likeButton) {
+                        like.save();
+                        holder.tvLikes.setText(like.getLikeQtt() + " likes");
+                    }
+
+                    @Override
+                    public void unLiked(LikeButton likeButton) {
+                        like.removeLike();
+                        holder.tvLikes.setText(like.getLikeQtt() + " likes");
+                    }
+                });
+
+                holder.tvLikes.setText(like.getLikeQtt() + " likes");
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override

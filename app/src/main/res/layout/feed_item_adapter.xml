@@ -59,7 +59,7 @@
             app:icon_size="30dp"
             android:id="@+id/btLikeFeed"
             android:layout_width="30dp"
-            android:layout_height="30dp"/>
+            android:layout_height="30dp" />
 
         <ImageView
             android:id="@+id/ivComments"
